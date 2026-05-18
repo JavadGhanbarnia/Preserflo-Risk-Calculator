@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preserflo Implant 5-Year Failure Risk Calculator</title>
+    <title>PreserFlo MicroShunt 5-Year Failure Risk Calculator</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         
@@ -143,6 +143,25 @@
         .form-section:hover {
             box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
             border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .form-section.model-selector-section {
+            background: linear-gradient(to bottom, rgba(120, 53, 15, 0.35) 0%, rgba(30, 41, 59, 0.55) 100%);
+            border: 1px solid rgba(251, 146, 60, 0.45);
+            box-shadow: 0 2px 12px rgba(251, 146, 60, 0.15);
+        }
+        
+        .form-section.model-selector-section:hover {
+            box-shadow: 0 4px 20px rgba(251, 146, 60, 0.28);
+            border-color: rgba(251, 146, 60, 0.65);
+        }
+        
+        .form-section.model-selector-section h3 {
+            background: linear-gradient(135deg, #fb923c 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border-image: linear-gradient(90deg, #fb923c 0%, #f59e0b 50%, transparent 100%) 1;
         }
         
         .form-section h3 {
@@ -528,20 +547,34 @@
         <p class="author">Created by Javad Ghanbarnia (MD)</p>
         
         <div class="warning-box">
-            <h3>⚠️ Important Limitations</h3>
+            <h3>⚠️ Important</h3>
             <ul>
-                <li><strong>C-statistic: 0.6013</strong> (modest discrimination)</li>
-                <li>Not yet validated for clinical decision-making</li>
-                <li>Use clinical judgment in combination with this tool</li>
+                <li>This is not a standalone clinical decision tool.</li>
             </ul>
         </div>
         
         <form id="riskForm">
+            <div class="form-section model-selector-section">
+                <h3>Success Definition (Model Selector)</h3>
+                
+                <div class="form-group">
+                    <label>Success Criterion</label>
+                    <select id="criterion" onchange="onCriterionChange()">
+                        <option value="CS14">Complete Success — IOP ≤ 14 mmHg (no medications)</option>
+                        <option value="CS17">Complete Success — IOP ≤ 17 mmHg (no medications)</option>
+                        <option value="CS21">Complete Success — IOP ≤ 21 mmHg (no medications)</option>
+                        <option value="QS14">Qualified Success — IOP ≤ 14 mmHg (with or without meds)</option>
+                        <option value="QS17">Qualified Success — IOP ≤ 17 mmHg (with or without meds)</option>
+                        <option value="QS21">Qualified Success — IOP ≤ 21 mmHg (with or without meds)</option>
+                    </select>
+                </div>
+            </div>
+            
             <div class="form-section">
                 <h3>💊 Baseline Medications</h3>
                 
                 <div class="form-group">
-                    <label>Number of Baseline Classes of Glaucoma Medications <span class="significant">***</span></label>
+                    <label>Number of Baseline Classes of Glaucoma Medications <span class="significant" id="sig_decision_meds"></span></label>
                     <div class="slider-container">
                         <input type="range" id="decision_meds" min="0" max="5" value="0" oninput="updateSliderValue(this)">
                         <span class="slider-value" id="decision_meds_value">0</span>
@@ -553,7 +586,7 @@
                 <h3>🔬 Intraoperative Specifications</h3>
                 
                 <div class="form-group">
-                    <label>Mitomycin C (MMC) Concentration <span class="significant">***</span></label>
+                    <label>Intraoperative Mitomycin C (MMC) Concentration <span class="significant" id="sig_mmc_04_01"></span></label>
                     <select id="mmc_04_01">
                         <option value="0">≥ 0.4 mg/mL</option>
                         <option value="1">&lt; 0.4 mg/mL</option>
@@ -565,7 +598,7 @@
                 <h3>👤 Demographics</h3>
                 
                 <div class="form-group">
-                    <label>Age</label>
+                    <label>Age <span class="significant" id="sig_age70_01"></span></label>
                     <select id="age70_01">
                         <option value="0">Under 70</option>
                         <option value="1">70 or older</option>
@@ -573,7 +606,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Sex</label>
+                    <label>Sex <span class="significant" id="sig_female"></span></label>
                     <select id="female">
                         <option value="0">Male</option>
                         <option value="1">Female</option>
@@ -581,7 +614,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Race/Ethnicity</label>
+                    <label>Race/Ethnicity <span class="significant" id="sig_non_caucasian_01"></span></label>
                     <select id="non_caucasian_01">
                         <option value="0">Caucasian</option>
                         <option value="1">Non-Caucasian</option>
@@ -593,7 +626,7 @@
                 <h3>🏥 Baseline Clinical Characteristics</h3>
                 
                 <div class="form-group">
-                    <label>Primary Open-Angle Glaucoma (POAG)</label>
+                    <label>Primary Open-Angle Glaucoma (POAG) <span class="significant" id="sig_poag_01"></span></label>
                     <select id="poag_01">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
@@ -601,7 +634,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Advanced Glaucoma</label>
+                    <label>Advanced Glaucoma <span class="significant" id="sig_advanced_glauc_01"></span></label>
                     <select id="advanced_glauc_01">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
@@ -609,7 +642,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Decision Intraocular Pressure (IOP)</label>
+                    <label>Decision Intraocular Pressure (IOP) <span class="significant" id="sig_deciop_high_21"></span></label>
                     <select id="deciop_high_21">
                         <option value="0">&lt; 21 mmHg</option>
                         <option value="1">≥ 21 mmHg</option>
@@ -617,7 +650,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Preoperative Visual Acuity</label>
+                    <label>Preoperative Visual Acuity <span class="significant" id="sig_preop_bcva_04orworse"></span></label>
                     <select id="preop_bcva_04orworse">
                         <option value="0">Better than 20/40</option>
                         <option value="1">20/40 or worse</option>
@@ -625,7 +658,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Pseudophakic (Intraocular Lens)</label>
+                    <label>Pseudophakic (Intraocular Lens) <span class="significant" id="sig_pseudophakic"></span></label>
                     <select id="pseudophakic">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
@@ -633,7 +666,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Diabetes Mellitus</label>
+                    <label>Diabetes Mellitus <span class="significant" id="sig_diabetes"></span></label>
                     <select id="diabetes">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
@@ -641,11 +674,24 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Prior Laser Trabeculoplasty</label>
+                    <label>Prior Laser Trabeculoplasty <span class="significant" id="sig_plaser_trabeculoplasty_01"></span></label>
                     <select id="plaser_trabeculoplasty_01">
                         <option value="0">No</option>
                         <option value="1">Yes</option>
                     </select>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>📈 Early Postoperative Course</h3>
+                
+                <div class="form-group">
+                    <label>Early Postoperative Hypotony (IOP &lt; 6 mmHg) <span class="significant" id="sig_distinct_iop_less_6_early"></span></label>
+                    <select id="distinct_iop_less_6_early">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                    <span class="helper-text">At least one postoperative visit with IOP &lt; 6 mmHg within the first postoperative month. Associated with reduced hazard of failure across all 6 models.</span>
                 </div>
             </div>
             
@@ -678,39 +724,672 @@
             <div class="risk-category" id="riskCategory"></div>
             
             <div class="disclaimer">
+                <strong>Selected Model:</strong> <span id="dispCriterion">—</span><br>
+                <br>
                 <strong>Model Details:</strong><br>
-                • Method: Cox Proportional Hazards (Efron method for ties)<br>
-                • Sample: 201 patients, 121 failures<br>
-                • Model p-value: 0.0281 (statistically significant)<br>
-                • C-statistic: 0.6013 (modest discrimination)<br>
-                • Only 2 of 12 variables are statistically significant (marked with ***)<br>
+                • Method: Cox Proportional Hazards (Efron method for tied failure times), fit in R<br>
+                • Sample: 201 eyes (172 patients), <span id="dispEvents">—</span> failures (event rate <span id="dispEventRate">—</span>%)<br>
+                • Baseline 5-year survival S₀(60): <span id="dispS0">—</span><br>
+                • Apparent C-statistic: <span id="dispApparentC">—</span><br>
+                • <strong>Bootstrap-validated C-statistic (B=1000):</strong> <span id="dispValidatedC">—</span> (optimism <span id="dispOptimism">—</span>)<br>
+                • Time-dependent AUC at 60 mo: <span id="dispAUC">—</span> [<span id="dispAUClow">—</span>–<span id="dispAUChigh">—</span>]<br>
+                • Brier score at 60 mo: <span id="dispBrier">—</span> · IPA: <span id="dispIPA">—</span> · E/O ratio: <span id="dispEO">—</span><br>
+                • Proportional hazards global p-value (Schoenfeld residuals): <span id="dispPHp">—</span> (assumption <span id="dispPHstatus">—</span>)<br>
+                • Statistically significant predictors (p &lt; 0.05) marked with <span class="significant">***</span> next to the field label<br>
                 <br>
-                <strong>Significant predictors:</strong> Number of baseline medication classes (p=0.005), Intraoperative MMC concentration (p=0.038)<br>
+                <strong>Significant predictors in this model:</strong> <span id="dispSigList">—</span><br>
                 <br>
-                <strong>Important Note:</strong> This is an early version of the model requiring further calibration and validation before it can be confidently used as a clinical decision-making tool. Until external validation is complete, clinical judgment should be used in combination with these predictions.
+                <strong>Inclusion criteria:</strong> Standalone PreserFlo MicroShunt surgery, age &gt; 18, non-refractory glaucoma, non-closed-angle glaucoma, non-combined surgery.<br>
+                <br>
+                <strong>Important Note:</strong> This is an internally validated model (apparent + bootstrap optimism-corrected). It has not yet been externally validated. Individual predictions should be interpreted as risk estimates only; clinical judgment must be used in combination with these predictions.
             </div>
         </div>
     </div>
 
     <script>
-        // Beta coefficients from Cox model (Efron method) - EXACT VALUES FROM STATA
-        const coefficients = {
-            'decision_meds': 0.30158167,
-            'poag_01': 0.12105565,
-            'mmc_04_01': 0.44295554,
-            'pseudophakic': 0.17632909,
-            'diabetes': -0.28217055,
-            'female': -0.12872418,
-            'non_caucasian_01': 0.19011747,
-            'deciop_high_21': -0.06749767,
-            'advanced_glauc_01': 0.10187007,
-            'preop_bcva_04orworse': 0.05972601,
-            'age70_01': 0.41202228,
-            'plaser_trabeculoplasty_01': 0.02829909
+        // ===== Six Cox proportional-hazards models (Efron method, fit in R) =====
+        // All predictor variables coded with reference = 0 (no sign-flipping; R default).
+        // Models, betas, hazard ratios with bootstrap CIs, p-values, and performance
+        // metrics for each of the 6 success definitions (CS/QS × IOP cutoff 14/17/21).
+        const MODELS = {
+  "CS14": {
+    "label": "Complete Success (IOP \u2264 14 mmHg)",
+    "S0_60": 0.749,
+    "N_events": 121,
+    "event_rate": 60.2,
+    "betas": {
+      "decision_meds": 0.2813,
+      "poag_01": 0.048,
+      "mmc_04_01": 0.5787,
+      "pseudophakic": 0.2471,
+      "diabetes": -0.2235,
+      "female": -0.0741,
+      "non_caucasian_01": 0.1594,
+      "deciop_high_21": 0.0002,
+      "advanced_glauc_01": 0.137,
+      "preop_bcva_04orworse": 0.0351,
+      "age70_01": 0.3608,
+      "plaser_trabeculoplasty_01": 0.0801,
+      "distinct_iop_less_6_early": -0.7669
+    },
+    "p_values": {
+      "decision_meds": 0.007,
+      "poag_01": 0.834,
+      "mmc_04_01": 0.0117,
+      "pseudophakic": 0.2096,
+      "diabetes": 0.4186,
+      "female": 0.7265,
+      "non_caucasian_01": 0.4076,
+      "deciop_high_21": 0.999,
+      "advanced_glauc_01": 0.5049,
+      "preop_bcva_04orworse": 0.9047,
+      "age70_01": 0.1741,
+      "plaser_trabeculoplasty_01": 0.6945,
+      "distinct_iop_less_6_early": 0.0001
+    },
+    "HR": {
+      "decision_meds": 1.3249,
+      "poag_01": 1.0492,
+      "mmc_04_01": 1.7838,
+      "pseudophakic": 1.2803,
+      "diabetes": 0.7997,
+      "female": 0.9286,
+      "non_caucasian_01": 1.1728,
+      "deciop_high_21": 1.0002,
+      "advanced_glauc_01": 1.1469,
+      "preop_bcva_04orworse": 1.0357,
+      "age70_01": 1.4345,
+      "plaser_trabeculoplasty_01": 1.0834,
+      "distinct_iop_less_6_early": 0.4645
+    },
+    "CI_low": {
+      "decision_meds": 1.0798,
+      "poag_01": 0.6696,
+      "mmc_04_01": 1.1377,
+      "pseudophakic": 0.8703,
+      "diabetes": 0.4653,
+      "female": 0.6131,
+      "non_caucasian_01": 0.8043,
+      "deciop_high_21": 0.6911,
+      "advanced_glauc_01": 0.7667,
+      "preop_bcva_04orworse": 0.5835,
+      "age70_01": 0.8526,
+      "plaser_trabeculoplasty_01": 0.7265,
+      "distinct_iop_less_6_early": 0.317
+    },
+    "CI_high": {
+      "decision_meds": 1.6256,
+      "poag_01": 1.644,
+      "mmc_04_01": 2.7969,
+      "pseudophakic": 1.8834,
+      "diabetes": 1.3745,
+      "female": 1.4064,
+      "non_caucasian_01": 1.71,
+      "deciop_high_21": 1.4476,
+      "advanced_glauc_01": 1.7156,
+      "preop_bcva_04orworse": 1.8384,
+      "age70_01": 2.4134,
+      "plaser_trabeculoplasty_01": 1.6154,
+      "distinct_iop_less_6_early": 0.6806
+    },
+    "apparent_c": 0.6543,
+    "validated_c": 0.6079,
+    "optimism": 0.0465,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7372,
+    "AUC_60_CI_low": 0.6611,
+    "AUC_60_CI_high": 0.8133,
+    "Brier_60": 0.1942,
+    "IPA_60": 0.1468,
+    "PH_global_p": 0.3728,
+    "EO_ratio": 0.993
+  },
+  "CS17": {
+    "label": "Complete Success (IOP \u2264 17 mmHg)",
+    "S0_60": 0.7352,
+    "N_events": 113,
+    "event_rate": 56.22,
+    "betas": {
+      "decision_meds": 0.2626,
+      "poag_01": 0.0033,
+      "mmc_04_01": 0.5095,
+      "pseudophakic": 0.2219,
+      "diabetes": -0.3286,
+      "female": -0.1844,
+      "non_caucasian_01": 0.1391,
+      "deciop_high_21": -0.2335,
+      "advanced_glauc_01": 0.1562,
+      "preop_bcva_04orworse": 0.1064,
+      "age70_01": 0.3719,
+      "plaser_trabeculoplasty_01": 0.2133,
+      "distinct_iop_less_6_early": -0.7183
+    },
+    "p_values": {
+      "decision_meds": 0.0172,
+      "poag_01": 0.9891,
+      "mmc_04_01": 0.0273,
+      "pseudophakic": 0.269,
+      "diabetes": 0.255,
+      "female": 0.403,
+      "non_caucasian_01": 0.4785,
+      "deciop_high_21": 0.2451,
+      "advanced_glauc_01": 0.4558,
+      "preop_bcva_04orworse": 0.7145,
+      "age70_01": 0.1729,
+      "plaser_trabeculoplasty_01": 0.3078,
+      "distinct_iop_less_6_early": 0.0004
+    },
+    "HR": {
+      "decision_meds": 1.3003,
+      "poag_01": 1.0033,
+      "mmc_04_01": 1.6645,
+      "pseudophakic": 1.2484,
+      "diabetes": 0.7199,
+      "female": 0.8316,
+      "non_caucasian_01": 1.1492,
+      "deciop_high_21": 0.7918,
+      "advanced_glauc_01": 1.169,
+      "preop_bcva_04orworse": 1.1123,
+      "age70_01": 1.4505,
+      "plaser_trabeculoplasty_01": 1.2377,
+      "distinct_iop_less_6_early": 0.4876
+    },
+    "CI_low": {
+      "decision_meds": 1.0476,
+      "poag_01": 0.6287,
+      "mmc_04_01": 1.0587,
+      "pseudophakic": 0.8424,
+      "diabetes": 0.4088,
+      "female": 0.5398,
+      "non_caucasian_01": 0.7823,
+      "deciop_high_21": 0.5341,
+      "advanced_glauc_01": 0.7755,
+      "preop_bcva_04orworse": 0.629,
+      "age70_01": 0.8497,
+      "plaser_trabeculoplasty_01": 0.8215,
+      "distinct_iop_less_6_early": 0.3288
+    },
+    "CI_high": {
+      "decision_meds": 1.614,
+      "poag_01": 1.601,
+      "mmc_04_01": 2.6167,
+      "pseudophakic": 1.8501,
+      "diabetes": 1.2677,
+      "female": 1.2812,
+      "non_caucasian_01": 1.6882,
+      "deciop_high_21": 1.1738,
+      "advanced_glauc_01": 1.7623,
+      "preop_bcva_04orworse": 1.9669,
+      "age70_01": 2.4762,
+      "plaser_trabeculoplasty_01": 1.8649,
+      "distinct_iop_less_6_early": 0.723
+    },
+    "apparent_c": 0.6506,
+    "validated_c": 0.6021,
+    "optimism": 0.0486,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7203,
+    "AUC_60_CI_low": 0.6434,
+    "AUC_60_CI_high": 0.7971,
+    "Brier_60": 0.2048,
+    "IPA_60": 0.1369,
+    "PH_global_p": 0.2876,
+    "EO_ratio": 0.993
+  },
+  "CS21": {
+    "label": "Complete Success (IOP \u2264 21 mmHg)",
+    "S0_60": 0.7381,
+    "N_events": 113,
+    "event_rate": 56.22,
+    "betas": {
+      "decision_meds": 0.2641,
+      "poag_01": -0.001,
+      "mmc_04_01": 0.5251,
+      "pseudophakic": 0.2308,
+      "diabetes": -0.318,
+      "female": -0.1911,
+      "non_caucasian_01": 0.1498,
+      "deciop_high_21": -0.2492,
+      "advanced_glauc_01": 0.1616,
+      "preop_bcva_04orworse": 0.098,
+      "age70_01": 0.3741,
+      "plaser_trabeculoplasty_01": 0.2262,
+      "distinct_iop_less_6_early": -0.7236
+    },
+    "p_values": {
+      "decision_meds": 0.0171,
+      "poag_01": 0.9966,
+      "mmc_04_01": 0.0246,
+      "pseudophakic": 0.2523,
+      "diabetes": 0.2741,
+      "female": 0.386,
+      "non_caucasian_01": 0.4445,
+      "deciop_high_21": 0.2131,
+      "advanced_glauc_01": 0.4438,
+      "preop_bcva_04orworse": 0.7367,
+      "age70_01": 0.1742,
+      "plaser_trabeculoplasty_01": 0.2758,
+      "distinct_iop_less_6_early": 0.0004
+    },
+    "HR": {
+      "decision_meds": 1.3023,
+      "poag_01": 0.999,
+      "mmc_04_01": 1.6906,
+      "pseudophakic": 1.2596,
+      "diabetes": 0.7276,
+      "female": 0.8261,
+      "non_caucasian_01": 1.1616,
+      "deciop_high_21": 0.7795,
+      "advanced_glauc_01": 1.1753,
+      "preop_bcva_04orworse": 1.103,
+      "age70_01": 1.4538,
+      "plaser_trabeculoplasty_01": 1.2539,
+      "distinct_iop_less_6_early": 0.485
+    },
+    "CI_low": {
+      "decision_meds": 1.0481,
+      "poag_01": 0.625,
+      "mmc_04_01": 1.0695,
+      "pseudophakic": 0.8484,
+      "diabetes": 0.4115,
+      "female": 0.5363,
+      "non_caucasian_01": 0.7913,
+      "deciop_high_21": 0.5266,
+      "advanced_glauc_01": 0.7773,
+      "preop_bcva_04orworse": 0.623,
+      "age70_01": 0.8475,
+      "plaser_trabeculoplasty_01": 0.8347,
+      "distinct_iop_less_6_early": 0.326
+    },
+    "CI_high": {
+      "decision_meds": 1.6181,
+      "poag_01": 1.5967,
+      "mmc_04_01": 2.6726,
+      "pseudophakic": 1.8702,
+      "diabetes": 1.2865,
+      "female": 1.2725,
+      "non_caucasian_01": 1.7052,
+      "deciop_high_21": 1.1537,
+      "advanced_glauc_01": 1.7772,
+      "preop_bcva_04orworse": 1.9528,
+      "age70_01": 2.4938,
+      "plaser_trabeculoplasty_01": 1.8835,
+      "distinct_iop_less_6_early": 0.7215
+    },
+    "apparent_c": 0.654,
+    "validated_c": 0.6038,
+    "optimism": 0.0501,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7187,
+    "AUC_60_CI_low": 0.6418,
+    "AUC_60_CI_high": 0.7957,
+    "Brier_60": 0.2048,
+    "IPA_60": 0.1366,
+    "PH_global_p": 0.3395,
+    "EO_ratio": 0.993
+  },
+  "QS14": {
+    "label": "Qualified Success (IOP \u2264 14 mmHg)",
+    "S0_60": 0.8312,
+    "N_events": 110,
+    "event_rate": 54.73,
+    "betas": {
+      "decision_meds": 0.3316,
+      "poag_01": 0.0372,
+      "mmc_04_01": 0.6311,
+      "pseudophakic": 0.1498,
+      "diabetes": -0.1514,
+      "female": -0.0174,
+      "non_caucasian_01": 0.0385,
+      "deciop_high_21": 0.0821,
+      "advanced_glauc_01": 0.19,
+      "preop_bcva_04orworse": 0.0982,
+      "age70_01": 0.4683,
+      "plaser_trabeculoplasty_01": 0.0806,
+      "distinct_iop_less_6_early": -0.7752
+    },
+    "p_values": {
+      "decision_meds": 0.0043,
+      "poag_01": 0.8789,
+      "mmc_04_01": 0.0062,
+      "pseudophakic": 0.4854,
+      "diabetes": 0.5984,
+      "female": 0.9355,
+      "non_caucasian_01": 0.8525,
+      "deciop_high_21": 0.6786,
+      "advanced_glauc_01": 0.3691,
+      "preop_bcva_04orworse": 0.7372,
+      "age70_01": 0.12,
+      "plaser_trabeculoplasty_01": 0.7108,
+      "distinct_iop_less_6_early": 0.0001
+    },
+    "HR": {
+      "decision_meds": 1.3932,
+      "poag_01": 1.0379,
+      "mmc_04_01": 1.8797,
+      "pseudophakic": 1.1616,
+      "diabetes": 0.8595,
+      "female": 0.9827,
+      "non_caucasian_01": 1.0392,
+      "deciop_high_21": 1.0856,
+      "advanced_glauc_01": 1.2093,
+      "preop_bcva_04orworse": 1.1032,
+      "age70_01": 1.5973,
+      "plaser_trabeculoplasty_01": 1.0839,
+      "distinct_iop_less_6_early": 0.4606
+    },
+    "CI_low": {
+      "decision_meds": 1.1093,
+      "poag_01": 0.643,
+      "mmc_04_01": 1.1961,
+      "pseudophakic": 0.7626,
+      "diabetes": 0.4893,
+      "female": 0.6448,
+      "non_caucasian_01": 0.6927,
+      "deciop_high_21": 0.7362,
+      "advanced_glauc_01": 0.7988,
+      "preop_bcva_04orworse": 0.6216,
+      "age70_01": 0.8851,
+      "plaser_trabeculoplasty_01": 0.708,
+      "distinct_iop_less_6_early": 0.3104
+    },
+    "CI_high": {
+      "decision_meds": 1.7497,
+      "poag_01": 1.6754,
+      "mmc_04_01": 2.954,
+      "pseudophakic": 1.7693,
+      "diabetes": 1.5097,
+      "female": 1.4978,
+      "non_caucasian_01": 1.5591,
+      "deciop_high_21": 1.6008,
+      "advanced_glauc_01": 1.8306,
+      "preop_bcva_04orworse": 1.9579,
+      "age70_01": 2.8829,
+      "plaser_trabeculoplasty_01": 1.6595,
+      "distinct_iop_less_6_early": 0.6835
+    },
+    "apparent_c": 0.655,
+    "validated_c": 0.607,
+    "optimism": 0.0479,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7366,
+    "AUC_60_CI_low": 0.6604,
+    "AUC_60_CI_high": 0.8129,
+    "Brier_60": 0.2015,
+    "IPA_60": 0.1658,
+    "PH_global_p": 0.4225,
+    "EO_ratio": 0.995
+  },
+  "QS17": {
+    "label": "Qualified Success (IOP \u2264 17 mmHg)",
+    "S0_60": 0.808,
+    "N_events": 90,
+    "event_rate": 44.78,
+    "betas": {
+      "decision_meds": 0.3243,
+      "poag_01": -0.0845,
+      "mmc_04_01": 0.5724,
+      "pseudophakic": 0.103,
+      "diabetes": -0.5478,
+      "female": -0.0895,
+      "non_caucasian_01": -0.0926,
+      "deciop_high_21": -0.6131,
+      "advanced_glauc_01": -0.0398,
+      "preop_bcva_04orworse": 0.2696,
+      "age70_01": 0.4227,
+      "plaser_trabeculoplasty_01": 0.3586,
+      "distinct_iop_less_6_early": -0.6501
+    },
+    "p_values": {
+      "decision_meds": 0.0238,
+      "poag_01": 0.7557,
+      "mmc_04_01": 0.0177,
+      "pseudophakic": 0.6553,
+      "diabetes": 0.1174,
+      "female": 0.6997,
+      "non_caucasian_01": 0.6815,
+      "deciop_high_21": 0.0116,
+      "advanced_glauc_01": 0.8661,
+      "preop_bcva_04orworse": 0.3781,
+      "age70_01": 0.2066,
+      "plaser_trabeculoplasty_01": 0.1369,
+      "distinct_iop_less_6_early": 0.003
+    },
+    "HR": {
+      "decision_meds": 1.383,
+      "poag_01": 0.919,
+      "mmc_04_01": 1.7725,
+      "pseudophakic": 1.1085,
+      "diabetes": 0.5782,
+      "female": 0.9144,
+      "non_caucasian_01": 0.9116,
+      "deciop_high_21": 0.5417,
+      "advanced_glauc_01": 0.961,
+      "preop_bcva_04orworse": 1.3094,
+      "age70_01": 1.5261,
+      "plaser_trabeculoplasty_01": 1.4313,
+      "distinct_iop_less_6_early": 0.522
+    },
+    "CI_low": {
+      "decision_meds": 1.044,
+      "poag_01": 0.5396,
+      "mmc_04_01": 1.1043,
+      "pseudophakic": 0.7052,
+      "diabetes": 0.2912,
+      "female": 0.5804,
+      "non_caucasian_01": 0.5859,
+      "deciop_high_21": 0.3365,
+      "advanced_glauc_01": 0.605,
+      "preop_bcva_04orworse": 0.719,
+      "age70_01": 0.792,
+      "plaser_trabeculoplasty_01": 0.8923,
+      "distinct_iop_less_6_early": 0.3399
+    },
+    "CI_high": {
+      "decision_meds": 1.8322,
+      "poag_01": 1.565,
+      "mmc_04_01": 2.845,
+      "pseudophakic": 1.7426,
+      "diabetes": 1.1479,
+      "female": 1.4406,
+      "non_caucasian_01": 1.4184,
+      "deciop_high_21": 0.872,
+      "advanced_glauc_01": 1.5265,
+      "preop_bcva_04orworse": 2.3849,
+      "age70_01": 2.9406,
+      "plaser_trabeculoplasty_01": 2.2959,
+      "distinct_iop_less_6_early": 0.8017
+    },
+    "apparent_c": 0.6647,
+    "validated_c": 0.6117,
+    "optimism": 0.053,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7339,
+    "AUC_60_CI_low": 0.6575,
+    "AUC_60_CI_high": 0.8103,
+    "Brier_60": 0.2069,
+    "IPA_60": 0.1711,
+    "PH_global_p": 0.3153,
+    "EO_ratio": 0.997
+  },
+  "QS21": {
+    "label": "Qualified Success (IOP \u2264 21 mmHg)",
+    "S0_60": 0.8476,
+    "N_events": 86,
+    "event_rate": 42.79,
+    "betas": {
+      "decision_meds": 0.3658,
+      "poag_01": -0.0923,
+      "mmc_04_01": 0.5172,
+      "pseudophakic": 0.1793,
+      "diabetes": -0.584,
+      "female": -0.0034,
+      "non_caucasian_01": -0.1276,
+      "deciop_high_21": -0.8841,
+      "advanced_glauc_01": -0.0097,
+      "preop_bcva_04orworse": 0.3382,
+      "age70_01": 0.5138,
+      "plaser_trabeculoplasty_01": 0.4427,
+      "distinct_iop_less_6_early": -0.7036
+    },
+    "p_values": {
+      "decision_meds": 0.0249,
+      "poag_01": 0.7438,
+      "mmc_04_01": 0.0412,
+      "pseudophakic": 0.4462,
+      "diabetes": 0.1145,
+      "female": 0.9884,
+      "non_caucasian_01": 0.588,
+      "deciop_high_21": 0.0004,
+      "advanced_glauc_01": 0.9689,
+      "preop_bcva_04orworse": 0.2824,
+      "age70_01": 0.1378,
+      "plaser_trabeculoplasty_01": 0.0769,
+      "distinct_iop_less_6_early": 0.0022
+    },
+    "HR": {
+      "decision_meds": 1.4416,
+      "poag_01": 0.9118,
+      "mmc_04_01": 1.6774,
+      "pseudophakic": 1.1964,
+      "diabetes": 0.5577,
+      "female": 0.9966,
+      "non_caucasian_01": 0.8802,
+      "deciop_high_21": 0.4131,
+      "advanced_glauc_01": 0.9904,
+      "preop_bcva_04orworse": 1.4024,
+      "age70_01": 1.6717,
+      "plaser_trabeculoplasty_01": 1.5569,
+      "distinct_iop_less_6_early": 0.4948
+    },
+    "CI_low": {
+      "decision_meds": 1.0473,
+      "poag_01": 0.5242,
+      "mmc_04_01": 1.0209,
+      "pseudophakic": 0.7543,
+      "diabetes": 0.2701,
+      "female": 0.63,
+      "non_caucasian_01": 0.5547,
+      "deciop_high_21": 0.2524,
+      "advanced_glauc_01": 0.6088,
+      "preop_bcva_04orworse": 0.757,
+      "age70_01": 0.8481,
+      "plaser_trabeculoplasty_01": 0.9533,
+      "distinct_iop_less_6_early": 0.3152
+    },
+    "CI_high": {
+      "decision_meds": 1.9843,
+      "poag_01": 1.5861,
+      "mmc_04_01": 2.7561,
+      "pseudophakic": 1.8977,
+      "diabetes": 1.1516,
+      "female": 1.5766,
+      "non_caucasian_01": 1.3966,
+      "deciop_high_21": 0.6761,
+      "advanced_glauc_01": 1.611,
+      "preop_bcva_04orworse": 2.5979,
+      "age70_01": 3.2951,
+      "plaser_trabeculoplasty_01": 2.5428,
+      "distinct_iop_less_6_early": 0.7769
+    },
+    "apparent_c": 0.687,
+    "validated_c": 0.6393,
+    "optimism": 0.0477,
+    "bootstrap_B": 1000,
+    "AUC_60": 0.7525,
+    "AUC_60_CI_low": 0.679,
+    "AUC_60_CI_high": 0.8261,
+    "Brier_60": 0.1998,
+    "IPA_60": 0.1967,
+    "PH_global_p": 0.1309,
+    "EO_ratio": 0.992
+  }
+};
+        
+        // Variable display names for the "significant predictors" list
+        const VAR_NAMES = {
+            'decision_meds': 'Number of baseline medication classes',
+            'poag_01': 'Primary open-angle glaucoma',
+            'mmc_04_01': 'MMC concentration',
+            'pseudophakic': 'Pseudophakic',
+            'diabetes': 'Diabetes',
+            'female': 'Female sex',
+            'non_caucasian_01': 'Non-Caucasian',
+            'deciop_high_21': 'Decision IOP',
+            'advanced_glauc_01': 'Advanced glaucoma',
+            'preop_bcva_04orworse': 'Preop BCVA 20/40 or worse',
+            'age70_01': 'Age ≥ 70',
+            'plaser_trabeculoplasty_01': 'Prior laser trabeculoplasty',
+            'distinct_iop_less_6_early': 'Early postoperative hypotony'
         };
         
-        // Baseline survival at 60 months (from Efron method model)
-        const S0_60 = 0.81521608;
+        // List of variable HTML ids in the order they appear in the model
+        const VAR_IDS = Object.keys(VAR_NAMES);
+        
+        // Currently selected model key
+        let currentModelKey = 'CS14';
+        
+        function getCurrentModel() {
+            return MODELS[currentModelKey];
+        }
+        
+        function fmt(x, d) {
+            return (x === null || x === undefined) ? '—' : Number(x).toFixed(d);
+        }
+        
+        // Significance marker based on p-value
+        function sigMarker(p) {
+            if (p === null || p === undefined) return '';
+            if (p < 0.001) return '***';
+            if (p < 0.01) return '**';
+            if (p < 0.05) return '*';
+            return '';
+        }
+        
+        // Update the in-form *** significance markers next to each label
+        // and rebuild the dynamic disclaimer text
+        function updateModelDisplay() {
+            const m = getCurrentModel();
+            
+            // Update significance markers next to each label
+            const sigPredictors = [];
+            VAR_IDS.forEach(id => {
+                const span = document.getElementById('sig_' + id);
+                if (!span) return;
+                const p = m.p_values[id];
+                const mark = sigMarker(p);
+                span.textContent = mark;
+                if (p < 0.05) sigPredictors.push(VAR_NAMES[id] + ' (HR ' + fmt(m.HR[id], 2) + ', p' + (p < 0.001 ? '<0.001' : ('=' + p.toFixed(3))) + ')');
+            });
+            
+            // Update disclaimer fields
+            document.getElementById('dispCriterion').textContent = m.label;
+            document.getElementById('dispEvents').textContent = m.N_events;
+            document.getElementById('dispEventRate').textContent = fmt(m.event_rate, 1);
+            document.getElementById('dispS0').textContent = fmt(m.S0_60, 4);
+            document.getElementById('dispApparentC').textContent = fmt(m.apparent_c, 3);
+            document.getElementById('dispValidatedC').textContent = fmt(m.validated_c, 3);
+            document.getElementById('dispOptimism').textContent = fmt(m.optimism, 3);
+            document.getElementById('dispAUC').textContent = fmt(m.AUC_60, 3);
+            document.getElementById('dispAUClow').textContent = fmt(m.AUC_60_CI_low, 3);
+            document.getElementById('dispAUChigh').textContent = fmt(m.AUC_60_CI_high, 3);
+            document.getElementById('dispBrier').textContent = fmt(m.Brier_60, 3);
+            document.getElementById('dispIPA').textContent = fmt(m.IPA_60, 3);
+            document.getElementById('dispEO').textContent = fmt(m.EO_ratio, 3);
+            document.getElementById('dispPHp').textContent = fmt(m.PH_global_p, 3);
+            document.getElementById('dispPHstatus').textContent = (m.PH_global_p > 0.05) ? 'holds' : 'violated';
+            document.getElementById('dispSigList').textContent = sigPredictors.length ? sigPredictors.join('; ') : 'None at p < 0.05';
+        }
+        
+        function onCriterionChange() {
+            currentModelKey = document.getElementById('criterion').value;
+            updateModelDisplay();
+            // If result box is already shown, recompute with the new model
+            const resultBox = document.getElementById('resultBox');
+            if (resultBox.classList.contains('show')) {
+                calculateRisk();
+            }
+        }
         
         function updateSliderValue(slider) {
             document.getElementById(slider.id + '_value').textContent = slider.value;
@@ -726,18 +1405,16 @@
             gauge.style.strokeDasharray = circumference;
             gauge.style.strokeDashoffset = circumference;
             
-            // Animate the gauge - matching the text animation timing
             setTimeout(() => {
                 const offset = circumference - (percentage / 100) * circumference;
                 gauge.style.strokeDashoffset = offset;
             }, 50);
             
-            // Animate the percentage number - synced with gauge
             let current = 0;
-            const duration = 1000; // 1 second total duration
+            const duration = 1000;
             const steps = 60;
             const stepTime = duration / steps;
-            const increment = percentage / steps; // Fixed: increment per step, not per 100
+            const increment = percentage / steps;
             
             const counter = setInterval(() => {
                 current += increment;
@@ -751,65 +1428,56 @@
         }
         
         function calculateRisk() {
-            // Collect all patient data
+            const m = getCurrentModel();
+            
+            // Collect predictor values
             const patientData = {};
-            for (let key in coefficients) {
-                const element = document.getElementById(key);
-                patientData[key] = parseFloat(element.value);
-            }
+            VAR_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                patientData[id] = parseFloat(el.value);
+            });
             
-            // Calculate linear predictor
-            let linearPredictor = 0;
-            for (let key in coefficients) {
-                linearPredictor += coefficients[key] * patientData[key];
-            }
+            // Linear predictor LP = sum(beta_j * x_j)
+            let LP = 0;
+            VAR_IDS.forEach(id => {
+                LP += m.betas[id] * patientData[id];
+            });
             
-            // Calculate survival probability: S(60|X) = [S0(60)]^exp(LP)
-            const survivalProb = Math.pow(S0_60, Math.exp(linearPredictor));
-            
-            // Calculate failure probability
+            // Survival probability: S(60|X) = S0(60) ^ exp(LP)
+            const survivalProb = Math.pow(m.S0_60, Math.exp(LP));
             const failureProb = 1 - survivalProb;
             const failurePct = failureProb * 100;
             
-            // Determine risk category
+            // Risk category
             let category, color, colorClass;
             if (failurePct < 30) {
-                category = "LOW RISK";
-                colorClass = "low-risk";
-                color = "#28a745";
+                category = "LOW RISK"; colorClass = "low-risk"; color = "#28a745";
             } else if (failurePct < 60) {
-                category = "MEDIUM RISK";
-                colorClass = "medium-risk";
-                color = "#ffc107";
+                category = "MEDIUM RISK"; colorClass = "medium-risk"; color = "#ffc107";
             } else {
-                category = "HIGH RISK";
-                colorClass = "high-risk";
-                color = "#dc3545";
+                category = "HIGH RISK"; colorClass = "high-risk"; color = "#dc3545";
             }
             
-            // Display results
-            document.getElementById('linearPredictor').textContent = linearPredictor.toFixed(4);
+            // Display
+            document.getElementById('linearPredictor').textContent = LP.toFixed(4);
             document.getElementById('survivalProb').textContent = survivalProb.toFixed(3);
             document.getElementById('riskCategory').textContent = 'Risk Category: ' + category;
             document.getElementById('riskCategory').style.color = color;
             
-            // Animate the gauge
             animateGauge(failurePct, color);
             
-            // Show result box
             const resultBox = document.getElementById('resultBox');
             resultBox.classList.add('show');
             
-            // Scroll to results
             setTimeout(() => {
                 resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
         }
         
-        // Pre-fill example on page load (optional)
+        // Initialize on page load
         window.onload = function() {
-            // You can set default values here if desired
             updateSliderValue(document.getElementById('decision_meds'));
+            onCriterionChange();
         };
     </script>
 </body>
